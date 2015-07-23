@@ -22,6 +22,22 @@ module Hashstructor
     # @return [Symbol] the type of the member; see {VALID_MEMBER_TYPES}.
     attr_reader :member_type
 
+    # The procedure used in {VALID_VALUE_TYPES} for both `TrueClass` and
+    # `FalseClass`.
+    BOOL_PROC = Proc.new do |v|
+        v = v.downcase
+
+        case v.downcase
+          when "true", "t", "on", "yes"
+            true
+          when "false", "f", "off", "no"
+            false
+          else
+            raise HashstructorError, "unknown value when parsing boolean: #{v}"
+        end
+      end
+
+
     # A hash of Class => Proc converters for value types. Any value type
     # in this list, as well as any class that includes or prepends
     # `Hashstructor`, is valid for {#value_type}. This is _intentionally_
@@ -40,12 +56,8 @@ module Hashstructor
       Float => Proc.new do |v|
         Float(v.to_s)
       end,
-      TrueClass => Proc.new do |v|
-        !!v
-      end,
-      FalseClass => Proc.new do |v|
-        !!v
-      end,
+      TrueClass => BOOL_PROC,
+      FalseClass => BOOL_PROC,
     }
     # Determines the class that Hashstructor should attempt to coerce a
     # given value into. For example, `Fixnum` will attempt to coerce a

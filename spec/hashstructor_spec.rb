@@ -71,6 +71,32 @@ describe Hashstructor do
     expect(ret.kenny).to eq(:wobble)
   end
 
+  it 'should handle boolean normals' do
+    require_relative "./test_classes/bool_class.rb"
+
+    expect {
+      BoolClass.new({
+        shaq: "derps"
+      })
+    }.to raise_error(Hashstructor::HashstructorError, /unknown value when parsing boolean/)
+
+    [ "true", "t", "on", "yes" ].each do |t_val|
+      ret = BoolClass.new({
+        shaq: t_val
+      })
+
+      expect(ret.shaq).to eq(true)
+    end
+
+    [ "false", "f", "off", "no" ].each do |f_val|
+      ret = BoolClass.new({
+        shaq: f_val
+      })
+
+      expect(ret.shaq).to eq(false)
+    end
+  end
+
   it 'should handle arrays and sets' do
     require_relative "./test_classes/array_class.rb"
 

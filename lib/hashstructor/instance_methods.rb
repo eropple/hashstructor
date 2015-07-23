@@ -29,13 +29,19 @@ module Hashstructor
 
       existing_members = partitioned_members[0]
       missing_members = partitioned_members[1]
-      raise HashstructorError, "Missing required members: #{missing_members.map { |m| m.name }.join(", ")}" \
-        if missing_members.any? { |m| m.required }
 
-      missing_members.reject { |m| m.required }.each do |member|
+      partitioned_missing_members = missing_members.partition { |m| !m.required || (m.required && m.options[:default_value]) }
+
+      acceptable_missing_members = partitioned_missing_members[0]
+      unacceptable_missing_members = partitioned_missing_members[1]
+
+      raise HashstructorError, "Missing required members: #{unacceptable_missing_members.map { |m| m.name }.join(", ")}" \
+        unless unacceptable_missing_members.empty?
+
+      acceptable_missing_members.each do |member|
         out_value = case member.member_type
                       when :normal
-                        # already nil
+                        member.options[:default_value]
                       when :array
                         []
                       when :set

@@ -95,6 +95,9 @@ module Hashstructor
       raise HashstructorError, "'member_type' (#{member_type}) must be one of: [ #{VALID_MEMBER_TYPES.join(", ")} ]" \
         unless VALID_MEMBER_TYPES.include?(member_type.to_sym)
 
+      raise HashstructorError, "'member_type' must be :normal to use 'default_value'." \
+        if member_type != :normal && options[:default_value]
+
       @member_type = member_type.to_sym
 
       raise HashstructorError, "'value_type' must be nil or a Class." \
@@ -106,17 +109,21 @@ module Hashstructor
 
       @value_type = value_type
 
+      raise HashstructorError, "'required' must be true if 'default_value'" \
+        if !required && options[:default_value]
       @required = required
 
+
+
       case attr_kind
-      when nil
-        # do nothing
-      when :reader
-        klass.send(:attr_reader, @name)
-      when :accessor
-        klass.send(:attr_accessor, @name)
-      else
-        raise HashstructorError, "Unrecognized attr_kind: #{attr_kind}"
+        when nil
+          # do nothing
+        when :reader
+          klass.send(:attr_reader, @name)
+        when :accessor
+          klass.send(:attr_accessor, @name)
+        else
+          raise HashstructorError, "Unrecognized attr_kind: #{attr_kind}"
       end
       @attr_kind = attr_kind
     end

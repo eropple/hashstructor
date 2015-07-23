@@ -39,6 +39,20 @@ describe Hashstructor do
     expect(ret.chuck).to eq(nil)
   end
 
+  it 'should provide empty collections for missing, non-required members' do
+    require_relative "./test_classes/unrequired_class.rb"
+
+    ret = UnrequiredClass.new({})
+
+    expect(ret.shaq).to eq(nil)
+    expect(ret.chuck.class).to eq(Array)
+    expect(ret.chuck.length).to eq(0)
+    expect(ret.kenny.class).to eq(Set)
+    expect(ret.kenny.length).to eq(0)
+    expect(ret.ernie.class).to eq(Hash)
+    expect(ret.kenny.length).to eq(0)
+  end
+
   it 'should handle normals' do
     require_relative "./test_classes/simple_normals.rb"
 

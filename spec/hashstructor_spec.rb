@@ -81,7 +81,7 @@ describe Hashstructor do
       })
     }.to raise_error(Hashstructor::HashstructorError, /unknown value when parsing boolean/)
 
-    [ "true", "t", "on", "yes" ].each do |t_val|
+    [ true, "true", "t", "on", "yes" ].each do |t_val|
       ret = BoolClass.new({
         shaq: t_val
       })
@@ -89,7 +89,7 @@ describe Hashstructor do
       expect(ret.shaq).to eq(true)
     end
 
-    [ "false", "f", "off", "no" ].each do |f_val|
+    [ false, "false", "f", "off", "no" ].each do |f_val|
       ret = BoolClass.new({
         shaq: f_val
       })

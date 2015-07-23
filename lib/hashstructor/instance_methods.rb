@@ -25,7 +25,7 @@ module Hashstructor
       # This could be done inline, but I'd rather loop twice and get this check
       # out of the way ahead of time because of the perf hit when dealing with
       # deeply nested structures.
-      partitioned_members = members.partition { |m| hash[m.name] || hash[m.name.to_s] }
+      partitioned_members = members.partition { |m| !hash[m.name].nil? || !hash[m.name.to_s].nil? }
 
       existing_members = partitioned_members[0]
       missing_members = partitioned_members[1]
@@ -54,7 +54,10 @@ module Hashstructor
       end
 
       existing_members.each do |member|
-        raw_value = hash[member.name] || hash[member.name.to_s]
+        raw_value = hash[member.name]
+        if raw_value.nil?
+          raw_value = hash[member.name.to_s]
+        end
         out_value = nil
 
         case member.member_type

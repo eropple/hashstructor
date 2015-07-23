@@ -25,15 +25,22 @@ module Hashstructor
     # The procedure used in {VALID_VALUE_TYPES} for both `TrueClass` and
     # `FalseClass`.
     BOOL_PROC = Proc.new do |v|
-        v = v.downcase
-
-        case v.downcase
-          when "true", "t", "on", "yes"
+        case v
+          when true
             true
-          when "false", "f", "off", "no"
+          when false
             false
           else
-            raise HashstructorError, "unknown value when parsing boolean: #{v}"
+            raise "'#{v}' not stringable" unless v.respond_to?(:to_s) && !v.nil?
+            v = v.downcase
+            case v.downcase
+              when "true", "t", "on", "yes"
+                true
+              when "false", "f", "off", "no"
+                false
+              else
+                raise HashstructorError, "unknown value when parsing boolean: #{v}"
+            end
         end
       end
 

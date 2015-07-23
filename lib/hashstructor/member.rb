@@ -132,6 +132,7 @@ module Hashstructor
         if !required && options[:default_value]
       @required = required
 
+      raise HashstructorError, "'validation' must be a Proc." unless options[:validation].nil? || options[:validation].is_a?(Proc)
 
 
       case attr_kind
@@ -150,15 +151,27 @@ module Hashstructor
     # Parses the passed-in value (always a single item; {InstanceMethods#hashstruct} handles
     # the breaking down of arrays and hashes) and returns a value according to {#value_type}.
     def parse_single(value)
-      if value_type.nil?
-        value
-      elsif value_type.ancestors.include?(Hashstructor)
-        raise HashstructorError, "No hash provided for building a Hashstructor object." unless value.is_a?(Hash)
+      retval = 
+        if value_type.nil?
+          value
+        elsif value_type.ancestors.include?(Hashstructor)
+          raise HashstructorError, "No hash provided for building a Hashstructor object." unless value.is_a?(Hash)
 
-        value_type.new(value)
-      else
-        VALID_VALUE_TYPES[value_type].call(value)
+          value_type.new(value)
+        else
+          VALID_VALUE_TYPES[value_type].call(value)
+        end
+
+      if options[:validation]
+        errors = []
+        options[:validation].call(retval, errors)
+
+        if !errors.empty?
+          raise HashstructorError, "Validation failure for '#{name}': #{errors.join("; ")}"
+        end
       end
+
+      retval
     end
   end
 end

@@ -22,40 +22,6 @@ describe Hashstructor do
     expect(ret.respond_to?(:kenny=)).to eq(true)
   end
 
-  it 'should handle required members' do
-    require_relative "./test_classes/required_class.rb"
-
-    expect {
-      RequiredClass.new({
-        chuck: 5
-      })
-    }.to raise_error(Hashstructor::HashstructorError, /required members.+shaq/)
-
-    ret = RequiredClass.new({
-      shaq: 5
-    })
-
-    expect(ret.shaq).to eq(5)
-    expect(ret.chuck).to eq(nil)
-    expect(ret.kenny).to eq(11)
-    expect(ret.ernie).to eq(false)
-  end
-
-  it 'should do the right thing for missing, non-required members' do
-    require_relative "./test_classes/unrequired_class.rb"
-
-    ret = UnrequiredClass.new({})
-
-    expect(ret.shaq).to eq(nil)
-
-    expect(ret.chuck.class).to eq(Array)
-    expect(ret.chuck.length).to eq(0)
-    expect(ret.kenny.class).to eq(Set)
-    expect(ret.kenny.length).to eq(0)
-    expect(ret.ernie.class).to eq(Hash)
-    expect(ret.kenny.length).to eq(0)
-  end
-
   it 'should handle normals' do
     require_relative "./test_classes/simple_normals.rb"
 
@@ -138,6 +104,56 @@ describe Hashstructor do
     expect(ret.chuck["d"]).to eq(4)
     expect(ret.chuck["e"]).to eq(5)
     expect(ret.chuck["f"]).to eq(6)
+  end
+
+  it 'should handle required members' do
+    require_relative "./test_classes/required_class.rb"
+
+    expect {
+      RequiredClass.new({
+        chuck: 5
+      })
+    }.to raise_error(Hashstructor::HashstructorError, /required members.+shaq/)
+
+    ret = RequiredClass.new({
+      shaq: 5
+    })
+
+    expect(ret.shaq).to eq(5)
+    expect(ret.chuck).to eq(nil)
+    expect(ret.kenny).to eq(11)
+    expect(ret.ernie).to eq(false)
+  end
+
+  it 'should do the right thing for missing, non-required members' do
+    require_relative "./test_classes/unrequired_class.rb"
+
+    ret = UnrequiredClass.new({})
+
+    expect(ret.shaq).to eq(nil)
+
+    expect(ret.chuck.class).to eq(Array)
+    expect(ret.chuck.length).to eq(0)
+    expect(ret.kenny.class).to eq(Set)
+    expect(ret.kenny.length).to eq(0)
+    expect(ret.ernie.class).to eq(Hash)
+    expect(ret.kenny.length).to eq(0)
+  end
+
+  it 'should handle valid_entries for normals' do
+    require_relative "./test_classes/validation_class.rb"
+
+    expect {
+      ValidationClass.new({
+        shaq: :bar
+      })
+    }.to raise_error(Hashstructor::HashstructorError, /must be foo/)
+
+    ret = ValidationClass.new({
+      shaq: :foo
+    })
+
+    expect(ret.shaq).to eq(:foo)
   end
 
   it 'should support nested hashstructor objects' do

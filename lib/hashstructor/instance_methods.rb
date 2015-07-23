@@ -30,7 +30,7 @@ module Hashstructor
       existing_members = partitioned_members[0]
       missing_members = partitioned_members[1]
 
-      partitioned_missing_members = missing_members.partition { |m| !m.required || (m.required && m.options[:default_value]) }
+      partitioned_missing_members = missing_members.partition { |m| !m.required || (m.required && !m.options[:default_value].nil?) }
 
       acceptable_missing_members = partitioned_missing_members[0]
       unacceptable_missing_members = partitioned_missing_members[1]

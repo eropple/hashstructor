@@ -38,6 +38,7 @@ describe Hashstructor do
     expect(ret.shaq).to eq(5)
     expect(ret.chuck).to eq(nil)
     expect(ret.kenny).to eq(11)
+    expect(ret.ernie).to eq(false)
   end
 
   it 'should do the right thing for missing, non-required members' do

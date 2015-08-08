@@ -3,6 +3,57 @@ require 'set'
 module Hashstructor
   # Instance methods for {Hashstructor} objects.
   module InstanceMethods
+
+
+    # Converts the class back to a hash.
+    #
+    # @returns [Hash] the hash representation of this class
+    def to_h
+      to_hash
+    end
+
+    # Converts the class back to a hash.
+    #
+    # @returns [Hash] the hash representation of this class
+    def to_hash
+      hash = {}
+
+      self.class.hashstructor_members.each do |member|
+        member_value = instance_variable_get("@#{member.name}")
+
+        out_value = 
+          case member.member_type
+            when :normal
+              member_value.nil? ? nil : member.to_hash_value(member_value)
+            when :array
+              # There's some weird Ruby thing I don't get here, but if I use
+              # a #select instead of an each + container, I end up returning
+              # the actual objects rather than their to_hashes.
+              container = []
+              member_value.each do |v|
+                container << member.to_hash_value(v) 
+              end
+              container
+            when :set
+              container = Set.new
+              member_value.each do |v|
+                container << member.to_hash_value(v) 
+              end
+              container
+            when :hash
+              container = {}
+              member_value.each do |k, v| 
+                container[k] = member.to_hash_value(v)
+              end
+              container
+          end
+
+        hash[member.name.to_sym] = out_value
+      end
+
+      hash
+    end
+
     private
     # Initializes the object. This exists for objects that `prepend`
     # {Hashstructor}; objects that `include` it must explicitly invoke

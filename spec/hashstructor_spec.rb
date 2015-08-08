@@ -188,4 +188,24 @@ describe Hashstructor do
 
   end
 
+  it 'should turn objects into hashes' do
+    hash = {
+      shaq: {
+        ernie: 1
+      },
+      chuck: [
+        { ernie: 1 },
+        { ernie: 2 },
+        { ernie: 3 }
+      ],
+      kenny: {
+        a: { ernie: 4 },
+        b: { ernie: 5 },
+        c: { ernie: 6 }
+      }
+    }
+    ret = TopObject.new(hash)
+
+    expect(ret.to_hash).to eq(hash)
+  end
 end

@@ -51,20 +51,32 @@ module Hashstructor
     # not frozen; if you want to extend it for your own use cases, I'm not
     # going to get in your way.
     VALID_VALUE_TYPES = {
-      String => Proc.new do |v|
-        v.to_s
-      end,
-      Symbol => Proc.new do |v|
-        v.to_sym
-      end,
-      Integer => Proc.new do |v|
-        Integer(v.to_s)
-      end,
-      Float => Proc.new do |v|
-        Float(v.to_s)
-      end,
-      TrueClass => BOOL_PROC,
-      FalseClass => BOOL_PROC,
+      String => {
+        :in =>  Proc.new do |v|
+                  v.to_s
+                end
+      },
+      Symbol => {
+        :in =>  Proc.new do |v|
+                  v.to_sym
+                end
+      },
+      Integer => {
+        :in =>  Proc.new do |v|
+                  Integer(v.to_s)
+                end
+      },
+      Float => {
+        :in =>  Proc.new do |v|
+                  Float(v.to_s)
+                end
+      },
+      TrueClass => {
+        :in => BOOL_PROC
+      },
+      FalseClass => {
+        :in => BOOL_PROC
+      },
     }
     # Determines the class that Hashstructor should attempt to coerce a
     # given value into. For example, `Fixnum` will attempt to coerce a
@@ -159,7 +171,7 @@ module Hashstructor
 
           value_type.new(value)
         else
-          VALID_VALUE_TYPES[value_type].call(value)
+          VALID_VALUE_TYPES[value_type][:in].call(value)
         end
 
       if options[:validation]
@@ -173,5 +185,29 @@ module Hashstructor
 
       retval
     end
+
+    # The inverse of {#parse_single}, which turns a hashstructed member into a hash value. This should
+    # always be a strict inverse; anything this returns should be able to be fed into {#parse_single}
+    # to return the value passed into this function in the first place.
+    def to_hash_value(member_value)
+      if member_value.class.ancestors.include?(Hashstructor)
+        member_value.to_hash
+      else
+        out_proc = VALID_VALUE_TYPES[value_type][:out]
+
+        if (out_proc && !value_type.nil?)
+          out_proc.call(member_value)
+        else
+          if member_value.respond_to?(:to_h)
+            member_value.to_h
+          elsif member_value.respond_to?(:to_hash)
+            member_value.to_hash
+          else
+            member_value
+          end
+        end
+      end
+    end
+
   end
 end
